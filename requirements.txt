@@ -1,0 +1,6 @@
+fastapi~=0.103.0
+pydantic~=2.5.3
+
+botright~=0.5.1
+starlette~=0.27.0
+loguru~=0.7.2
