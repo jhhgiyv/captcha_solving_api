@@ -1,7 +1,8 @@
 import uuid
-from abc import ABC, abstractmethod
 from typing import Optional, Type
+
 from loguru import logger
+
 from captcha_solving_api.model import Task, TaskType, GetTaskResultResponse, TaskResultStatus, CaptchaSolving, \
     CreateTaskResponse
 from captcha_solving_api.recaptcha.v2 import ReCaptchaV2

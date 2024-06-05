@@ -1,0 +1,29 @@
+<html>
+<head>
+    <title>reCAPTCHA demo: Simple page</title>
+    <script async defer src="https://www.google.com/recaptcha/api.js"></script>
+    <script>
+        function onSubmit(token) {
+            document.getElementById("demo-form").submit();
+        }
+    </script>
+</head>
+<body>
+
+<pre>
+* Invisible recaptcha v2
+* Automatically bind the challenge to a button
+* Submit via form POST
+* https://developers.google.com/recaptcha/docs/invisible#auto_render
+</pre>
+
+<form action="https://recaptcha-endpoint-3j4pqc8v5m7y.runkit.sh/?site_key=6LfAGLYaAAAAALoLXYu2vn27KBemkjiVceMYmBUh"
+      id='demo-form'
+      method="POST">
+    <button class="g-recaptcha" data-callback='onSubmit' data-sitekey="6LfAGLYaAAAAALoLXYu2vn27KBemkjiVceMYmBUh">
+        Submit
+    </button>
+    <br/>
+</form>
+</body>
+</html>
