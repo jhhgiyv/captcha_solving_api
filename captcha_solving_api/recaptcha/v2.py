@@ -42,7 +42,7 @@ class ReCaptchaV2(CaptchaSolving):
     @classmethod
     async def class_init(cls):
         if cls._botright_client is None:
-            cls._botright_client = await botright.Botright()
+            cls._botright_client = await botright.Botright(headless=True)
             cls._browser = await cls._botright_client.new_browser()
             with open('captcha_solving_api/recaptcha/v2-checkbox-auto-nowww.html', 'r') as file:
                 cls._html_content = file.read()

@@ -37,7 +37,8 @@ class CaptchaSolvingTask:
     async def get_task_result(self) -> GetTaskResultResponse:
         if self.error:
             return GetTaskResultResponse(errorId=1, errorCode="ERROR_INTERNAL_SERVER_ERROR",
-                                         errorDescription=str(self.error), taskId=self.task_id)
+                                         errorDescription=str(self.error), taskId=self.task_id,
+                                         status=TaskResultStatus.error)
         if self.solver is None:
             return GetTaskResultResponse(status=TaskResultStatus.processing)
         result = await self.solver.get_task_result()
