@@ -1,0 +1,35 @@
+<html>
+<head>
+    <title>reCAPTCHA demo: Simple page</title>
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lc2GbYaAAAAAO7eQ7Xs4uPdEmlz3BD3aAxf94Lw"></script>
+</head>
+<body>
+
+<pre>
+* reCAPTCHA v3
+* action: "submit"
+* Programmatically invoke the challenge
+* https://developers.google.com/recaptcha/docs/v3#programmatically_invoke_the_challenge
+</pre>
+
+<div>
+    <button id="submit">Submit</button>
+</div>
+
+<textarea id="results" style="height: 400px;width: 100%;">Results will show up here</textarea>
+
+<script>
+    function onClick(e) {
+        e.preventDefault();
+        grecaptcha.ready(function () {
+            grecaptcha.execute('6Lc2GbYaAAAAAO7eQ7Xs4uPdEmlz3BD3aAxf94Lw', {action: 'action_submit'}).then(async function (token) {
+                console.log(token)
+            });
+        });
+    }
+
+    document.getElementById("submit").addEventListener("click", onClick);
+</script>
+
+</body>
+</html>

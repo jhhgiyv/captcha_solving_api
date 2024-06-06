@@ -8,6 +8,7 @@ from pydantic import BaseModel
 class TaskType(Enum):
     NoCaptchaTaskProxyless = 'NoCaptchaTaskProxyless'
     TurnstileTaskS2 = 'TurnstileTaskS2'
+    RecaptchaV3TaskProxyless = 'RecaptchaV3TaskProxyless'
 
 
 class CreateTaskResponse(BaseModel):
@@ -22,7 +23,8 @@ class Task(BaseModel):
     websiteURL: Optional[str] = None
     websiteKey: Optional[str] = None
     proxy: Optional[str] = None
-    isInvisible: Optional[bool] = False
+    isInvisible: Optional[bool] = None
+    pageAction: Optional[str] = None
 
 
 class SolutionResult(BaseModel):
@@ -47,6 +49,8 @@ class TaskResultStatus(Enum):
 
 class Solution(BaseModel):
     gRecaptchaResponse: Optional[str] = None
+    token: Optional[str] = None
+    userAgent: Optional[str] = None
 
     class Config:
         exclude_none = True

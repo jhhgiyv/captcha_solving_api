@@ -3,12 +3,16 @@ from typing import Optional, Type
 
 from loguru import logger
 
+from captcha_solving_api.cloudflare.turnstile import TurnstileSolver
 from captcha_solving_api.model import Task, TaskType, GetTaskResultResponse, TaskResultStatus, CaptchaSolving, \
     CreateTaskResponse
 from captcha_solving_api.recaptcha.v2 import ReCaptchaV2
+from captcha_solving_api.recaptcha.v3 import ReCaptchaV3
 
 task_types: dict[TaskType, Type[CaptchaSolving]] = {
-    TaskType.NoCaptchaTaskProxyless: ReCaptchaV2
+    TaskType.NoCaptchaTaskProxyless: ReCaptchaV2,
+    TaskType.TurnstileTaskS2: TurnstileSolver,
+    TaskType.RecaptchaV3TaskProxyless: ReCaptchaV3,
 }
 
 
