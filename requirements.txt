@@ -7,3 +7,4 @@ loguru~=0.7.2
 playwright-recaptcha
 ddddocr~=1.5.3
 dynaconf~=3.2.5
+curl_cffi
