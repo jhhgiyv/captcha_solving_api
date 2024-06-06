@@ -15,8 +15,9 @@ async def create_task(task: CreateTask, background_tasks: BackgroundTasks) -> Cr
     return await captcha_solving_task.get_CreateTaskResponse()
 
 
-@app.post("/getTaskResult")
-async def get_task_result(task: GetTaskResult) -> GetTaskResultResponse:
+@app.post("/getTaskResult", response_model=GetTaskResultResponse, response_model_exclude_unset=True)
+async def get_task_result(task: GetTaskResult) \
+        -> GetTaskResultResponse:
     task = tasks.get(task.taskId)
     if task is None:
         return GetTaskResultResponse(errorId=1, errorCode="ERROR_TASKID_INVALID",

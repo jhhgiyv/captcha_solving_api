@@ -4,6 +4,7 @@ from typing import Optional, Type
 from loguru import logger
 
 from captcha_solving_api.cloudflare.turnstile import TurnstileSolver
+from captcha_solving_api.image_ocr.ddocr import DdddOcrModelV1
 from captcha_solving_api.model import Task, TaskType, GetTaskResultResponse, TaskResultStatus, CaptchaSolving, \
     CreateTaskResponse
 from captcha_solving_api.recaptcha.v2 import ReCaptchaV2
@@ -13,6 +14,7 @@ task_types: dict[TaskType, Type[CaptchaSolving]] = {
     TaskType.NoCaptchaTaskProxyless: ReCaptchaV2,
     TaskType.TurnstileTaskS2: TurnstileSolver,
     TaskType.RecaptchaV3TaskProxyless: ReCaptchaV3,
+    TaskType.ImageToTextTaskM1: DdddOcrModelV1
 }
 
 

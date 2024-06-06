@@ -1,0 +1,3 @@
+use_gpu = true
+device_id = 1
+funcaptcha_server = "http://localhost:8081"

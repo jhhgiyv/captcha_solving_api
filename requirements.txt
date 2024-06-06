@@ -5,3 +5,5 @@ botright~=0.5.1
 starlette~=0.37.2
 loguru~=0.7.2
 playwright-recaptcha
+ddddocr~=1.5.3
+dynaconf~=3.2.5

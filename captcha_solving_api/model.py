@@ -9,6 +9,7 @@ class TaskType(Enum):
     NoCaptchaTaskProxyless = 'NoCaptchaTaskProxyless'
     TurnstileTaskS2 = 'TurnstileTaskS2'
     RecaptchaV3TaskProxyless = 'RecaptchaV3TaskProxyless'
+    ImageToTextTaskM1 = 'ImageToTextTaskM1'
 
 
 class CreateTaskResponse(BaseModel):
@@ -18,6 +19,12 @@ class CreateTaskResponse(BaseModel):
     taskId: str
 
 
+class DdddOcrSettings(BaseModel):
+    bata: Optional[bool] = False
+    set_ranges: Optional[str | int] = None
+    png_fix: Optional[bool] = False
+
+
 class Task(BaseModel):
     type: TaskType
     websiteURL: Optional[str] = None
@@ -25,6 +32,8 @@ class Task(BaseModel):
     proxy: Optional[str] = None
     isInvisible: Optional[bool] = None
     pageAction: Optional[str] = None
+    body: Optional[str] = None
+    ddddOcrSettings: Optional[DdddOcrSettings] = None
 
 
 class SolutionResult(BaseModel):
@@ -51,9 +60,7 @@ class Solution(BaseModel):
     gRecaptchaResponse: Optional[str] = None
     token: Optional[str] = None
     userAgent: Optional[str] = None
-
-    class Config:
-        exclude_none = True
+    text: Optional[str] = None
 
 
 class GetTaskResultResponse(BaseModel):
