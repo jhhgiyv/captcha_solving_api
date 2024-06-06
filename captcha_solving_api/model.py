@@ -10,6 +10,7 @@ class TaskType(Enum):
     TurnstileTaskS2 = 'TurnstileTaskS2'
     RecaptchaV3TaskProxyless = 'RecaptchaV3TaskProxyless'
     ImageToTextTaskM1 = 'ImageToTextTaskM1'
+    FunCaptchaClassification = 'FunCaptchaClassification'
 
 
 class CreateTaskResponse(BaseModel):
@@ -34,10 +35,8 @@ class Task(BaseModel):
     pageAction: Optional[str] = None
     body: Optional[str] = None
     ddddOcrSettings: Optional[DdddOcrSettings] = None
-
-
-class SolutionResult(BaseModel):
-    pass
+    question: Optional[str] = None
+    image: Optional[str] = None
 
 
 class CreateTask(BaseModel):
@@ -61,6 +60,8 @@ class Solution(BaseModel):
     token: Optional[str] = None
     userAgent: Optional[str] = None
     text: Optional[str] = None
+    objects: Optional[list[int]] = None
+    labels: Optional[list[str]] = None
 
 
 class GetTaskResultResponse(BaseModel):
