@@ -1,62 +1,56 @@
+import asyncio
 import random
-import time
 from typing import Optional
 
-from botright import botright
-from botright.playwright_mock import BrowserContext, Page
+from playwright.async_api import Playwright, Browser, async_playwright
+from loguru import logger
 
 from captcha_solving_api.model import CaptchaSolving, GetTaskResultResponse, Task, TaskResultStatus, Solution
+from captcha_solving_api.utils.proxy import proxy2dict
 from config import settings
 
 
 class TurnstileSolver(CaptchaSolving):
-    _botright_client: Optional[botright.Botright] = None
-    _browser: Optional[BrowserContext] = None
+    _browser: Optional[Browser] = None
     _html_content: Optional[str] = None
 
     @classmethod
-    async def create_task(cls, task: Task) -> 'TurnstileSolver':
-        await cls.class_init()
-        ctx = await cls._botright_client.new_browser(proxy=task.proxy.replace('http://', ''))
-        page = await ctx.new_page()
-        obj = cls(page, task)
-        return obj
-
-    @classmethod
-    async def class_init(cls):
-        if cls._botright_client is None:
-            cls._botright_client = await botright.Botright(headless=settings.headless)
-            cls._browser = await cls._botright_client.new_browser()
-            with open('captcha_solving_api/cloudflare/page.html', 'r') as file:
-                cls._html_content = file.read()
+    async def create_task(cls, task: Task) -> 'CaptchaSolving':
+        if not cls._browser:
+            playwright = await async_playwright().__aenter__()
+            cls._browser = await playwright.firefox.launch(headless=settings.headless)
+            with open("captcha_solving_api/cloudflare/page.html") as f:
+                cls._html_content = f.read()
+        return cls(task)
 
     async def get_task_result(self) -> GetTaskResultResponse:
-        if self.output:
-            return GetTaskResultResponse(errorId=0, errorCode="", errorDescription="",
-                                         status=TaskResultStatus.ready,
-                                         solution=Solution(token=self.output, userAgent=self.ua))
-
-        return GetTaskResultResponse(errorId=0, errorCode="",
-                                     errorDescription="", status=TaskResultStatus.processing)
+        if self.output == "failed":
+            return GetTaskResultResponse(errorId=1, status=TaskResultStatus.error)
+        if self.output is None:
+            return GetTaskResultResponse(status=TaskResultStatus.processing)
+        return GetTaskResultResponse(solution=Solution(token=self.output), status=TaskResultStatus.ready)
 
     async def finalize(self):
-        await self.page.browser.close()
+        await self.terminate()
 
     async def init(self):
+        await self.start_browser()
         await self.solve(self.task.websiteURL, self.task.websiteKey, self.task.isInvisible)
 
-    def __init__(self, page: Page, task: Task):
-        self.page = page
+    def __init__(self, task: Task):
         self.task = task
+        self.ctx: Optional[Browser] = None
         self.output: Optional[str] = None
-        self.ua = ''
 
-    async def build_page_data(self):
+    async def terminate(self):
+        await self.ctx.close()
+
+    def build_page_data(self):
         # this builds a custom page with the sitekey so we do not have to load the actual page, taking less bandwidth
         stub = f"<div class=\"cf-turnstile\" data-sitekey=\"{self.sitekey}\"></div>"
-        self._html_content = self._html_content.replace("<!-- cf turnstile -->", stub)
+        self.page_data = self._html_content.replace("<!-- cf turnstile -->", stub)
 
-    async def get_mouse_path(self, x1, y1, x2, y2):
+    def get_mouse_path(self, x1, y1, x2, y2):
         # calculate the path to x2 and y2 from x1 and y1
         path = []
         x = x1
@@ -84,10 +78,10 @@ class TurnstileSolver(CaptchaSolving):
         return path
 
     async def move_to(self, x, y):
-        for path in await self.get_mouse_path(self.current_x, self.current_y, x, y):
+        for path in self.get_mouse_path(self.current_x, self.current_y, x, y):
             await self.page.mouse.move(path[0], path[1])
             if random.randint(0, 100) > 15:
-                time.sleep(random.randint(1, 5) / random.randint(400, 600))
+                await asyncio.sleep(random.randint(1, 5) / random.randint(400, 600))
 
     async def solve_invisible(self):
         iterations = 0
@@ -102,50 +96,46 @@ class TurnstileSolver(CaptchaSolving):
             self.current_y = self.random_y
             elem = await self.page.query_selector("[name=cf-turnstile-response]")
             if elem:
-                if elem.get_attribute("value"):
-                    return elem.get_attribute("value")
-            time.sleep(random.randint(2, 5) / random.randint(400, 600))
+                if await elem.get_attribute("value"):
+                    return await elem.get_attribute("value")
+            await asyncio.sleep(random.randint(2, 5) / random.randint(400, 600))
         return "failed"
 
     async def solve_visible(self):
-
+        await self.page.wait_for_selector("iframe")
         iframe = await self.page.query_selector("iframe")
         while not iframe:
             iframe = await self.page.query_selector("iframe")
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
         while not await iframe.bounding_box():
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
 
-        x = await iframe.bounding_box()
-        x = x["x"] + random.randint(5, 12)
-        y = await iframe.bounding_box()
-        y = y["y"] + random.randint(5, 12)
+        x = (await iframe.bounding_box())["x"] + random.randint(5, 12)
+        y = (await iframe.bounding_box())["y"] + random.randint(5, 12)
         await self.move_to(x, y)
         self.current_x = x
         self.current_y = y
         framepage = await iframe.content_frame()
-        checkbox = framepage.query_selector("input")
+        logger.info("iframe found", framepage.url)
+        checkbox = await framepage.query_selector("input")
 
         while not checkbox:
             checkbox = await framepage.query_selector("input")
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
 
-        width = await checkbox.bounding_box()
-        width = width["width"]
-        height = await checkbox.bounding_box()
-        height = height["height"]
+        width = (await checkbox.bounding_box())["width"]
+        height = (await checkbox.bounding_box())["height"]
 
-        x = await checkbox.bounding_box()
-        x = x["x"] + width / 5 + random.randint(int(width / 5), int(width - width / 5))
-        y = await checkbox.bounding_box()
-        y = y["y"] + height / 5 + random.randint(int(height / 5), int(height - height / 5))
+        x = (await checkbox.bounding_box())["x"] + width / 5 + random.randint(int(width / 5), int(width - width / 5))
+        y = (await checkbox.bounding_box())["y"] + height / 5 + random.randint(int(height / 5),
+                                                                               int(height - height / 5))
 
         await self.move_to(x, y)
 
         self.current_x = x
         self.current_y = y
 
-        time.sleep(random.randint(1, 5) / random.randint(400, 600))
+        await asyncio.sleep(random.randint(1, 5) / random.randint(400, 600))
         await self.page.mouse.click(x, y)
 
         iterations = 0
@@ -160,19 +150,20 @@ class TurnstileSolver(CaptchaSolving):
             self.current_y = self.random_y
             elem = await self.page.query_selector("[name=cf-turnstile-response]")
             if elem:
-                if elem.get_attribute("value"):
-                    return elem.get_attribute("value")
-            time.sleep(random.randint(2, 5) / random.randint(400, 600))
+                if await elem.get_attribute("value"):
+                    return await elem.get_attribute("value")
+            await asyncio.sleep(random.randint(2, 5) / random.randint(400, 600))
         return "failed"
 
     async def solve(self, url, sitekey, invisible=False):
         self.url = url + "/" if not url.endswith("/") else url
         self.sitekey = sitekey
         self.invisible = invisible
+        self.page = await self.ctx.new_page()
 
-        await self.build_page_data()
+        self.build_page_data()
 
-        await self.page.route(self.url, lambda route: route.fulfill(body=self._html_content, status=200))
+        await self.page.route(self.url, lambda route: route.fulfill(body=self.page_data, status=200))
         await self.page.goto(self.url)
         output = "failed"
         self.current_x = 0
@@ -185,5 +176,10 @@ class TurnstileSolver(CaptchaSolving):
         else:
             output = await self.solve_visible()
 
-        self.ua = await self.page.evaluate("() => navigator.userAgent")
         self.output = output
+
+    async def start_browser(self):
+        if self.task.proxy:
+            self.ctx = await self._browser.new_context(proxy=proxy2dict(self.task.proxy))
+        else:
+            self.ctx = await self._browser.new_context()
