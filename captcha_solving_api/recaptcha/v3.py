@@ -6,6 +6,7 @@ from loguru import logger
 from playwright_recaptcha import recaptchav3
 
 from captcha_solving_api.model import CaptchaSolving, GetTaskResultResponse, Task, TaskResultStatus, Solution
+from config import settings
 
 
 class ReCaptchaV3(CaptchaSolving):
@@ -56,7 +57,7 @@ class ReCaptchaV3(CaptchaSolving):
     @classmethod
     async def class_init(cls):
         if cls._botright_client is None:
-            cls._botright_client = await botright.Botright(headless=False)
+            cls._botright_client = await botright.Botright(headless=settings.headless)
             cls._browser = await cls._botright_client.new_browser()
             with open('captcha_solving_api/recaptcha/v3-programmatic.html', 'r') as file:
                 cls._html_content = file.read()

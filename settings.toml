@@ -1,3 +1,5 @@
-use_gpu = true
+use_gpu = false
 device_id = 1
 funcaptcha_server = "http://localhost:8081"
+client_key = "your-api-key"
+headless = true
