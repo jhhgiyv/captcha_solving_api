@@ -31,7 +31,7 @@ class Task(BaseModel):
     websiteURL: Optional[str] = None
     websiteKey: Optional[str] = None
     proxy: Optional[str] = None
-    isInvisible: Optional[bool] = None
+    isInvisible: Optional[bool] = False
     pageAction: Optional[str] = None
     body: Optional[str] = None
     ddddOcrSettings: Optional[DdddOcrSettings] = None
