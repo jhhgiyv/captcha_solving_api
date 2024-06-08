@@ -2,8 +2,8 @@ import asyncio
 import random
 from typing import Optional
 
-from playwright.async_api import Playwright, Browser, async_playwright
 from loguru import logger
+from playwright.async_api import Browser, async_playwright
 
 from captcha_solving_api.model import CaptchaSolving, GetTaskResultResponse, Task, TaskResultStatus, Solution
 from captcha_solving_api.utils.proxy import proxy2dict
