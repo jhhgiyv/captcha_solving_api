@@ -82,7 +82,6 @@ class CloudFlare5s(CaptchaSolving):
         if self.task.userAgent:
             ua = self.task.userAgent
         with get_page(self.task.proxy, ua) as p:
-
             self.ua = p.user_agent
             p.listen.start(f'{self.task.websiteURL}.*', is_regex=True)
             p.get(self.task.websiteURL)

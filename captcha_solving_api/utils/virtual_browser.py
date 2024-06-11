@@ -53,7 +53,8 @@ def get_page(proxy, user_agent=None):
     try:
         yield page
     finally:
-        page.screencast.stop()
+        if settings.debug_screen:
+            page.screencast.stop()
         page.close()
         page.quit(5, True)
         workers.put(worker)
