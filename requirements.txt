@@ -1,10 +1,11 @@
 fastapi~=0.111.0
 pydantic~=2.5.3
-
 botright~=0.5.1
 starlette~=0.37.2
 loguru~=0.7.2
 playwright-recaptcha
 ddddocr~=1.5.3
 dynaconf~=3.2.5
-curl_cffi
+curl_cffi~=0.6.4
+DrissionPage~=4.0.4.24
+playwright~=1.40.0

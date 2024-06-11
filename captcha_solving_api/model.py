@@ -11,6 +11,7 @@ class TaskType(Enum):
     RecaptchaV3TaskProxyless = 'RecaptchaV3TaskProxyless'
     ImageToTextTaskM1 = 'ImageToTextTaskM1'
     FunCaptchaClassification = 'FunCaptchaClassification'
+    CloudFlareTaskS2 = 'CloudFlareTaskS2'
 
 
 class CreateTaskResponse(BaseModel):
@@ -37,6 +38,8 @@ class Task(BaseModel):
     ddddOcrSettings: Optional[DdddOcrSettings] = None
     question: Optional[str] = None
     image: Optional[str] = None
+    waitLoad: Optional[bool] = False
+    userAgent: Optional[str] = None
 
 
 class CreateTask(BaseModel):
@@ -62,6 +65,11 @@ class Solution(BaseModel):
     text: Optional[str] = None
     objects: Optional[list[int]] = None
     labels: Optional[list[str]] = None
+    user_agent: Optional[str] = None
+    cookies: Optional[dict[str, str]] = None
+    content: Optional[str] = None
+    request_headers: Optional[dict[str, str]] = None
+    headers: Optional[dict[str, str]] = None
 
 
 class GetTaskResultResponse(BaseModel):

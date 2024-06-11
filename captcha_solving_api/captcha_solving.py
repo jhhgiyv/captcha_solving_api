@@ -3,6 +3,7 @@ from typing import Optional, Type
 
 from loguru import logger
 
+from captcha_solving_api.cloudflare.cloudflare5s import CloudFlare5s
 from captcha_solving_api.cloudflare.turnstile import TurnstileSolver
 from captcha_solving_api.funcaptcha.funcaptcha_server import FunCaptchaServer
 from captcha_solving_api.image_ocr.ddocr import DdddOcrModelV1
@@ -16,7 +17,8 @@ task_types: dict[TaskType, Type[CaptchaSolving]] = {
     TaskType.TurnstileTaskS2: TurnstileSolver,
     TaskType.RecaptchaV3TaskProxyless: ReCaptchaV3,
     TaskType.ImageToTextTaskM1: DdddOcrModelV1,
-    TaskType.FunCaptchaClassification: FunCaptchaServer
+    TaskType.FunCaptchaClassification: FunCaptchaServer,
+    TaskType.CloudFlareTaskS2: CloudFlare5s
 }
 
 
@@ -28,6 +30,7 @@ class CaptchaSolvingTask:
         self.solver: Optional[CaptchaSolving] = None
         self.error: Optional[Exception] = None
 
+    @logger.catch
     async def init(self):
         try:
             self.solver = await task_types[self.task.type].create_task(self.task)

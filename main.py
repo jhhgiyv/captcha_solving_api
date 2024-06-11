@@ -4,6 +4,7 @@ from starlette.background import BackgroundTasks
 from captcha_solving_api.captcha_solving import CaptchaSolvingTask, tasks
 from captcha_solving_api.model import CreateTask, CreateTaskResponse, GetTaskResult, GetTaskResultResponse, \
     TaskResultStatus
+from captcha_solving_api.utils.proxy_bridge import proxy_adapter
 from config import settings
 
 app = FastAPI()
@@ -15,6 +16,8 @@ async def create_task(task: CreateTask, background_tasks: BackgroundTasks) -> Cr
         return CreateTaskResponse(errorId=1, errorCode="ERROR_KEY_DOES_NOT_EXIST",
                                   errorDescription="请检查你的clientKey密钥是否正确", taskId="")
     captcha_solving_task = CaptchaSolvingTask(task.task)
+    task.task.proxy = proxy_adapter(task.task.proxy)
+
     background_tasks.add_task(captcha_solving_task.init)
     return await captcha_solving_task.get_CreateTaskResponse()
 
