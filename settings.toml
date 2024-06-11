@@ -7,6 +7,6 @@ proxy_bridge_url = "http://localhost:8080"
 proxy_bridge_host = "localhost"
 proxy_bridge_api_key = "your_api_key"
 drission_page_headless = false
-debug_screen = true
+debug_screen = false
 virtual_browser_worker_start = 1
 virtual_browser_worker_end = 100
